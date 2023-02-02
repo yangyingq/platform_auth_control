@@ -1,15 +1,21 @@
 <?php
 
 
-namespace App\Http\Controllers;
+namespace App\Libraries;
 
 use App\Exceptions\RequestException;
 use App\Helpers\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BaseController extends Controller
 {
+    //基础模型
+    protected $models = null;
+    //基础服务类
+    protected $services = null;
     //基础规则
     protected $baseRules = [
 
@@ -27,6 +33,7 @@ class BaseController extends Controller
     public function __construct()
     {
         $this->autoValidate();
+        $this->registService();
     }
 
     /**
@@ -55,9 +62,9 @@ class BaseController extends Controller
     public function getRouteInfo() {
         $pathInfo = explode('/', request()->path());
         return [
-            'terminal' => $pathInfo[0],
-            'module' => $pathInfo[1],
-            'method' => $pathInfo[2]
+            'terminal' => $pathInfo[0]?? '',
+            'module' => $pathInfo[1]?? '',
+            'method' => $pathInfo[2]?? ''
         ];
     }
 
@@ -90,10 +97,30 @@ class BaseController extends Controller
         return false;
     }
 
+
+    /**
+     * 'terminal' => $pathInfo[0],
+     * 'module' => $pathInfo[1],
+     * 'method' => $pathInfo[2]
+     * 自动注册服务类
+     */
+    public function registService() {
+        $info = $this->getRouteInfo();
+        $service = 'App\\Services\\'.ucfirst($info['terminal']).'\\'.ucfirst($info['module']).'Service';
+        if(class_exists($service)) {
+            $this->services = app($service);
+        }
+    }
+
     /**
      * @param $data
      */
     public function success($data = []) {
         return Tools::success('获取成功', 0, $data);
+    }
+
+
+    public function callBefore() {
+
     }
 }

@@ -15,4 +15,5 @@
             return is_null($value) ? value($default) : $value;
         }
     }
+
 ?>

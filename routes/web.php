@@ -11,7 +11,15 @@
 |
 */
 
-
-Route::prefix('admin')->namespace('Admin')->group(function($router) {
-    $router->post('login', 'AuthController@login');
+$router->group(['namespace' => 'Admin'], function($router){
+    //系统模块
+    $router->group(['prefix' => 'system', 'namespace' => 'system'], function ($router) {
+        //角色模块
+        $router->group(['prefix' => 'role'], function ($router) {
+            $router->get('list', 'RoleController@list');
+        });
+    });
+    $router->post('login', 'SiteController@login');
+    $router->get('admin_info', 'SiteController@getAdminInfo');
+    $router->post('logout', 'SiteController@logout');
 });
